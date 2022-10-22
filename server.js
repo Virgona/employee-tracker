@@ -1,6 +1,7 @@
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
 const cTable = require('console.table');
+const employeeClass = require('./classes/Employee')
 
 // Connect to database
 const db = mysql.createConnection(
@@ -25,6 +26,9 @@ function promptCommands() {
                 'View all Employees',
                 'View all Departments',
                 'View all Roles',
+                'Add Department',
+                'Add Employee',
+                'Add Role',
                 'QUIT'
             ]
         }
@@ -43,6 +47,18 @@ function promptCommands() {
             case 'View all Departments':
                 getDepartments()
                 break;
+
+            case 'Add Employee':
+                addEmployee()
+                break;
+
+            case 'Add Department':
+                addDepartment();
+                break;
+
+            case 'Add Role':
+                addRole();
+
             default:
                 break;
         };
@@ -61,8 +77,63 @@ function promptCommands() {
     // -- then
     // -- -- 
 }
+function addDepartment() {
+    inquirer.prompt([
+        {
+            type: 'input',
+            name: 'dep',
+            message: "What is the name of the new Department?"
+        }
+    ]).then((answers) => {
+        console.log(answers);
+        const sql = `INSERT INTO department (name)
+            VALUES (?)`;
+        const params = answers.dep;
+        db.query(sql, params, (err, rows) => {
+            console.log('department successfully added')
+            promptCommands()
+        })
+    })
+}
 
+function addRole() {
+    const sql = `SELECT * FROM department`;
+
+    db.query(sql, (err, rows) => {
+        const arr = rows.map(department => department.id);
+        console.log(arr)
+
+        return inquirer.prompt([
+            {
+                name: 'title',
+                message: 'What is the title of this role?',
+            },
+            {
+                name: 'salary',
+                message: 'What is the wage of this role?'
+            },
+            {
+                type: 'list',
+                name: 'choice',
+                message: 'Which department does this role belong?',
+                choices: rows
+            },
+        ]).then(answers => {
+            const sql = `INSERT INTO role (title, salary, department_id)
+            VALUES (?,?,?)`;
+            const param = [answers.title, answers.salary, arr];
+            db.query(sql, param, (err, rows) => {
+                if (err) console.log(err);
+                console.log('role added successfully')
+                console.table(answers)
+                promptCommands();
+            });
+        });
+    });
+};
 function addEmployee() {
+
+
     // query the roles table for role name and id
     // take the array of role object and transform (map) them into and array of choice objects
     // [{ id: 2, title: 'front end dev', salary: 50, department_id: 1}] turn this 
@@ -70,11 +141,33 @@ function addEmployee() {
     // that array of objects gets passed into lists
 
     inquirer.prompt([
-        // ask their first name
-        // ask their last name
-        // ask ther role (list)
-        // ask ther manager (lists)
-    ]).then(() => {
+        {
+            type: 'input',
+            name: 'first',
+            message: "What is the new employee's first name?"
+        },
+        {
+            type: 'input',
+            name: 'last',
+            message: "What is the new employee's last name?"
+        },
+        {
+            type: 'list',
+            name: 'role',
+            message: "What is the new employee's role?",
+            choices: ['engineer', 'intern', 'sales'],
+        },
+        {
+            type: 'list',
+            name: 'manager',
+            message: 'Who is Thier Manager?',
+            choices: ['manager 1', 'manager 2', 'manager 3']
+        }
+    ]).then((answers) => {
+        console.log(answers);
+        const newEmployee = new Employee(answers.first, answers.last, answers.role)
+        // answers = newEmployee
+        // const sql = `INSERT `
         // db.query to insert a row
     })
 }

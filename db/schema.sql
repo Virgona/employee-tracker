@@ -13,7 +13,7 @@ CREATE TABLE role (
     title VARCHAR(30),
     salary DECIMAL,
     department_id INT NOT NULL,
-    INDEX dep_ind (department_id),
+    -- INDEX dep_ind (department_id),
     FOREIGN KEY (department_id) 
     REFERENCES department(id) 
     ON DELETE CASCADE

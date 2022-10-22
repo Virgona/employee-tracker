@@ -1,10 +1,11 @@
 INSERT INTO department (name)
-VALUES ('IT');
+VALUES  ('it');
+        ('sales')
 
 INSERT INTO role (title, salary, department_id)
-VALUES  ("Back End Developer", 50, 1),
-        ("Front End Dev", 50, 1),
-        ("Helpdesk", 25, 1);
+VALUES  ("engineer", 50, 1),
+        ("intern", 0, 1),
+        ("salesperson", 25, 2);
 
 INSERT INTO employee (first_name, last_name, role_id)
 VALUES ("Bob", "Dole", 1),
