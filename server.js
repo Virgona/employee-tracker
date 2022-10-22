@@ -100,7 +100,10 @@ function addRole() {
     const sql = `SELECT * FROM department`;
 
     db.query(sql, (err, rows) => {
+        console.log('rows');
+        console.log(rows);
         const arr = rows.map(department => department.id);
+        console.log('arr');
         console.log(arr)
 
         return inquirer.prompt([
@@ -121,7 +124,18 @@ function addRole() {
         ]).then(answers => {
             const sql = `INSERT INTO role (title, salary, department_id)
             VALUES (?,?,?)`;
-            const param = [answers.title, answers.salary, arr];
+            console.log(answers.choice);
+            let departmentId = null;
+            for (key in arr) {
+                console.log('key');
+                console.log(key)
+                console.log('rows')
+                if (rows[key].name === answers.choice) {
+                    departmentId = parseInt(key) + 1
+                }
+            }
+            const param = [answers.title, answers.salary, departmentId];
+            console.log(param);
             db.query(sql, param, (err, rows) => {
                 if (err) console.log(err);
                 console.log('role added successfully')
