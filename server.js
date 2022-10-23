@@ -1,7 +1,6 @@
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
 const cTable = require('console.table');
-const employeeClass = require('./classes/Employee')
 
 // Connect to database
 const db = mysql.createConnection(
@@ -28,6 +27,7 @@ function promptCommands() {
                 'View all Roles',
                 'Add Department',
                 'Add Employee',
+                'Update Employee',
                 'Add Role',
                 'QUIT'
             ]
@@ -50,6 +50,10 @@ function promptCommands() {
 
             case 'Add Employee':
                 addEmployee()
+                break;
+
+            case 'Update Employee':
+                updateEmployee();
                 break;
 
             case 'Add Department':
@@ -196,6 +200,54 @@ function addEmployee() {
             });
         });
     });
+}
+
+function updateEmployee() {
+    let arr;
+    let employeeSelection;
+    let roleSelection;
+
+    db.query(`SELECT * FROM Employee`, (err, rows) => {
+        const employees = [];
+        rows.forEach(row => employees.push(row.first_name + ' ' + row.last_name))
+        inquirer.prompt([
+            {
+                name: 'employee',
+                type: 'list',
+                choices: employees,
+                message: 'Which employee would you like to update?'
+            }
+        ]).then((answers) => {
+            let employeeSelection = answers
+        });
+    });
+
+    db.query('SELECT * FROM role', (err, rows) => {
+        if (err) { throw err };
+        const arr = rows.map(role => role.id);
+
+        let roles = [];
+        rows.forEach(row => roles.push(row.title));
+        let roleSelection = inquirer.prompt([
+            {
+                name: 'role',
+                type: 'list',
+                choices: roles,
+                message: 'Select role to update employee with'
+            }
+        ]);
+    });
+
+    let roleId = null;
+    for (key in arr) {
+        if (rows[key].title === answers.role) {
+            roleId = parseInt(key) + 1
+        }
+    }
+    // sql = db.query("UPDATE employee SET ? WHERE ?", [{ role_id: roleSelection.role }, { id: employeeSelection.employee }]);
+
+    console.log('employee successfully updated!');
+    promptCommands();
 }
 
 function getEmployees() {
