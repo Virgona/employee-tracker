@@ -145,6 +145,8 @@ function addEmployee() {
 
     db.query(sql, (err, rows) => {
 
+        const roles = [];
+        rows.forEach(row => roles.push(row.title))
         const arr = rows.map(role => role.id);
 
         return inquirer.prompt([
@@ -162,7 +164,7 @@ function addEmployee() {
                 type: 'list',
                 name: 'role',
                 message: "What is the new employee's role?",
-                choices: rows,
+                choices: roles,
             },
             {
                 type: 'list',
@@ -171,16 +173,20 @@ function addEmployee() {
                 choices: ['manager 1', 'manager 2', 'manager 3']
             }
         ]).then((answers) => {
-            const sql = `INSERT INTO employee (first_name, last_name, role_id)
-            VALUES (?,?,?)`;
+            const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id)
+            VALUES (?,?,?,?)`;
 
             let roleId = null;
             for (key in arr) {
-                if (rows[key].name === answers.choice) {
+                if (rows[key].title === answers.role) {
                     roleId = parseInt(key) + 1
                 }
             }
-            const param = [answers.first_name, answers.last_name, roleId];
+            console.log(roleId)
+
+            console.log(arr);
+
+            const param = [answers.first, answers.last, roleId, 1];
 
             db.query(sql, param, (err, rows) => {
                 if (err) console.log(err);
