@@ -100,11 +100,8 @@ function addRole() {
     const sql = `SELECT * FROM department`;
 
     db.query(sql, (err, rows) => {
-        console.log('rows');
-        console.log(rows);
+
         const arr = rows.map(department => department.id);
-        console.log('arr');
-        console.log(arr)
 
         return inquirer.prompt([
             {
@@ -127,9 +124,6 @@ function addRole() {
             console.log(answers.choice);
             let departmentId = null;
             for (key in arr) {
-                console.log('key');
-                console.log(key)
-                console.log('rows')
                 if (rows[key].name === answers.choice) {
                     departmentId = parseInt(key) + 1
                 }
@@ -147,43 +141,55 @@ function addRole() {
 };
 function addEmployee() {
 
+    const sql = `SELECT * FROM role`;
 
-    // query the roles table for role name and id
-    // take the array of role object and transform (map) them into and array of choice objects
-    // [{ id: 2, title: 'front end dev', salary: 50, department_id: 1}] turn this 
-    // [{ name: 'front end dev', value: 2 }] into this
-    // that array of objects gets passed into lists
+    db.query(sql, (err, rows) => {
 
-    inquirer.prompt([
-        {
-            type: 'input',
-            name: 'first',
-            message: "What is the new employee's first name?"
-        },
-        {
-            type: 'input',
-            name: 'last',
-            message: "What is the new employee's last name?"
-        },
-        {
-            type: 'list',
-            name: 'role',
-            message: "What is the new employee's role?",
-            choices: ['engineer', 'intern', 'sales'],
-        },
-        {
-            type: 'list',
-            name: 'manager',
-            message: 'Who is Thier Manager?',
-            choices: ['manager 1', 'manager 2', 'manager 3']
-        }
-    ]).then((answers) => {
-        console.log(answers);
-        const newEmployee = new Employee(answers.first, answers.last, answers.role)
-        // answers = newEmployee
-        // const sql = `INSERT `
-        // db.query to insert a row
-    })
+        const arr = rows.map(role => role.id);
+
+        return inquirer.prompt([
+            {
+                type: 'input',
+                name: 'first',
+                message: "What is the new employee's first name?"
+            },
+            {
+                type: 'input',
+                name: 'last',
+                message: "What is the new employee's last name?"
+            },
+            {
+                type: 'list',
+                name: 'role',
+                message: "What is the new employee's role?",
+                choices: rows,
+            },
+            {
+                type: 'list',
+                name: 'manager',
+                message: 'Who is Thier Manager?',
+                choices: ['manager 1', 'manager 2', 'manager 3']
+            }
+        ]).then((answers) => {
+            const sql = `INSERT INTO employee (first_name, last_name, role_id)
+            VALUES (?,?,?)`;
+
+            let roleId = null;
+            for (key in arr) {
+                if (rows[key].name === answers.choice) {
+                    roleId = parseInt(key) + 1
+                }
+            }
+            const param = [answers.first_name, answers.last_name, roleId];
+
+            db.query(sql, param, (err, rows) => {
+                if (err) console.log(err);
+                console.log('role added successfully')
+                console.table(answers)
+                promptCommands();
+            });
+        });
+    });
 }
 
 function getEmployees() {
