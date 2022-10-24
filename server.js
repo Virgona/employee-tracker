@@ -203,9 +203,9 @@ function addEmployee() {
 }
 
 function updateEmployee() {
-    let arr;
-    let employeeSelection;
-    let roleSelection;
+    // let arr;
+    // let employeeSelection;
+    // let roleSelection;
 
     db.query(`SELECT * FROM Employee`, (err, rows) => {
         const employees = [];
@@ -218,37 +218,54 @@ function updateEmployee() {
                 message: 'Which employee would you like to update?'
             }
         ]).then((answers) => {
-            let employeeSelection = answers
+            let employeeId = answers.employeeId;
+            db.findAllRoles()
+                .then(([rows]) => {
+                    let roles = rows;
+                    const roleChoices = roles.map(({ id, title }) => ({
+                        name: title,
+                        value: id
+                    }));
+                    inquirer.prompt([
+                        {
+                            type: "list",
+                            name: "roleId",
+                            message: "Which role do you want to assign the selected employee?",
+                            choices: roleChoices
+                        }
+                    ])
+                        .then(answers => db.updateEmployeeRole(employeeId, answers.roleId))
+                });
         });
-    });
 
-    db.query('SELECT * FROM role', (err, rows) => {
-        if (err) { throw err };
-        const arr = rows.map(role => role.id);
-
-        let roles = [];
-        rows.forEach(row => roles.push(row.title));
-        let roleSelection = inquirer.prompt([
-            {
-                name: 'role',
-                type: 'list',
-                choices: roles,
-                message: 'Select role to update employee with'
-            }
-        ]);
-    });
-
-    let roleId = null;
-    for (key in arr) {
-        if (rows[key].title === answers.role) {
-            roleId = parseInt(key) + 1
-        }
-    }
-    // sql = db.query("UPDATE employee SET ? WHERE ?", [{ role_id: roleSelection.role }, { id: employeeSelection.employee }]);
-
-    console.log('employee successfully updated!');
-    promptCommands();
+        console.log('employee successfully updated!');
+        promptCommands();
+    })
 }
+// db.query('SELECT * FROM role', (err, rows) => {
+//     if (err) { throw err };
+//     const arr = rows.map(role => role.id);
+
+//     let roles = [];
+//     rows.forEach(row => roles.push(row.title));
+//     let roleSelection = inquirer.prompt([
+//         {
+//             name: 'role',
+//             type: 'list',
+//             choices: roles,
+//             message: 'Select role to update employee with'
+//         }
+//     ]);
+// });
+
+// let roleId = null;
+// for (key in arr) {
+//     if (rows[key].title === answers.role) {
+//         roleId = parseInt(key) + 1
+//     }
+// }
+// sql = db.query("UPDATE employee SET ? WHERE ?", [{ role_id: roleSelection.role }, { id: employeeSelection.employee }]);
+
 
 function getEmployees() {
     const sql = `SELECT * FROM employee`;
