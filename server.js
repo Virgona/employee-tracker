@@ -207,40 +207,42 @@ function updateEmployee() {
     // let employeeSelection;
     // let roleSelection;
 
-    db.query(`SELECT * FROM Employee`, (err, rows) => {
-        const employees = [];
-        rows.forEach(row => employees.push(row.first_name + ' ' + row.last_name))
-        inquirer.prompt([
-            {
-                name: 'employee',
-                type: 'list',
-                choices: employees,
-                message: 'Which employee would you like to update?'
-            }
-        ]).then((answers) => {
-            let employeeId = answers.employeeId;
-            db.findAllRoles()
-                .then(([rows]) => {
-                    let roles = rows;
-                    const roleChoices = roles.map(({ id, title }) => ({
-                        name: title,
-                        value: id
-                    }));
-                    inquirer.prompt([
-                        {
-                            type: "list",
-                            name: "roleId",
-                            message: "Which role do you want to assign the selected employee?",
-                            choices: roleChoices
-                        }
-                    ])
-                        .then(answers => db.updateEmployeeRole(employeeId, answers.roleId))
-                });
-        });
+    db.promise().query(`SELECT * FROM employee`)
+        .then(([rows]) => {
+            console.log(rows)
+            const employees = [];
+            rows.forEach(row => employees.push({ name: row.first_name + ' ' + row.last_name, value: row.id }))
+            console.log(employees);
+            inquirer.prompt([
+                {
+                    name: 'employee',
+                    type: 'list',
+                    choices: employees,
+                    message: 'Which employee would you like to update?'
+                }
+            ]).then(answers => {
+                db.promise().query(`SELECT * FROM role`)
+                    .then(([rows]) => {
+                        const roles = [];
+                        rows.forEach(row => roles.push({ name: row.title, value: row.id }));
+                        console.log(roles);
+                        inquirer.prompt([
+                            {
+                                type: "list",
+                                name: "roleTitle",
+                                message: "Which role do you want to assign the selected employee?",
+                                choices: roles
+                            }
+                        ]).then(data => {
+                            db.promise().query(`UPDATE employee SET role_id = ? WHERE id = ?`, [data.value, answers.value])
+                        })
+                    })
+            })
+        })
 
-        console.log('employee successfully updated!');
-        promptCommands();
-    })
+    console.log('employee successfully updated!');
+    promptCommands();
+    // })
 }
 // db.query('SELECT * FROM role', (err, rows) => {
 //     if (err) { throw err };
