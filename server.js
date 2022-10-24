@@ -234,7 +234,7 @@ function updateEmployee() {
                                 choices: roles
                             }
                         ]).then(data => {
-                            db.promise().query(`UPDATE employee SET role_id = ? WHERE id = ?`, [data.value, answers.value])
+                            db.promise().query(`UPDATE employee SET role_id = ? WHERE id = ?`, [data.roleTitle, answers.employee])
                         })
                     })
             })
