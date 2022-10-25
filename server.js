@@ -62,7 +62,10 @@ function promptCommands() {
 
             case 'Add Role':
                 addRole();
+                break;
 
+            case 'QUIT':
+                process.exit();
             default:
                 break;
         };
@@ -78,7 +81,6 @@ function addDepartment() {
             message: "What is the name of the new Department?"
         }
     ]).then((answers) => {
-        console.log(answers);
         const sql = `INSERT INTO department (name)
             VALUES (?)`;
         const params = answers.dep;
@@ -140,8 +142,7 @@ function addEmployee() {
     db.query(sql, (err, rows) => {
 
         const roles = [];
-        rows.forEach(row => roles.push(row.title))
-        const arr = rows.map(role => role.id);
+        rows.forEach(row => roles.push(row))
 
         return inquirer.prompt([
             {
@@ -158,38 +159,42 @@ function addEmployee() {
                 type: 'list',
                 name: 'role',
                 message: "What is the new employee's role?",
-                choices: roles,
-            },
-            {
-                type: 'list',
-                name: 'manager',
-                message: 'Who is Thier Manager?',
-                choices: ['manager 1', 'manager 2', 'manager 3']
-            }
-        ]).then((answers) => {
-            const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id)
-            VALUES (?,?,?,?)`;
+                choices: roles.map(role => ({ name: role.title, value: role.id })),
+            }]).then(
+                (answers) => {
+                    console.log('ANSWERS')
+                    console.log(answers)
+                    db.promise().query('SELECT * FROM employee').then(
+                        ([rows]) => {
+                            const managerChoices = rows.map(({ id, first_name, last_name }) => (
+                                {
+                                    name: `${first_name} ${last_name}`,
+                                    value: id
+                                }
+                            ))
+                            inquirer.prompt({
+                                type: 'list',
+                                name: 'managerId',
+                                message: 'Who is the manager?',
+                                choices: managerChoices
+                            }).then((manager) => {
+                                console.log('MANAGER')
+                                console.log(manager)
+                                const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id)
+                                            VALUES (?,?,?,?)`;
 
-            let roleId = null;
-            for (key in arr) {
-                if (rows[key].title === answers.role) {
-                    roleId = parseInt(key) + 1
-                }
-            }
-            console.log(roleId)
+                                const param = [answers.first, answers.last, answers.role, manager.managerId];
 
-            console.log(arr);
-
-            const param = [answers.first, answers.last, roleId, 1];
-
-            db.query(sql, param, (err, rows) => {
-                if (err) console.log(err);
-                console.log('role added successfully')
-                console.table(answers)
-                promptCommands();
-            });
-        });
-    });
+                                db.query(sql, param, (err, rows) => {
+                                    if (err) console.log(err);
+                                    console.log('employee added successfully')
+                                    console.table(getEmployees())
+                                    promptCommands();
+                                });
+                            });
+                        });
+                })
+    })
 }
 // function to update an existing employee in the database
 function updateEmployee() {
@@ -221,14 +226,17 @@ function updateEmployee() {
                                 choices: roles
                             }
                         ]).then(data => {
-                            db.promise().query(`UPDATE employee SET role_id = ? WHERE id = ?`, [data.roleTitle, answers.employee])
+                            db.promise().query(`UPDATE employee SET role_id = ? WHERE id = ?`, [data.roleTitle, answers.employee]).then(
+                                () => {
+                                    console.log('employee successfully updated!');
+                                    promptCommands();
+                                }
+                            )
                         })
                     })
             })
         })
 
-    console.log('employee successfully updated!');
-    promptCommands();
 }
 
 // functions below get employees, roles and departments and displays them
