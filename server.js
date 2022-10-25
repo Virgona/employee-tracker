@@ -98,7 +98,7 @@ function addRole() {
 
         const arr = rows.map(department => department.id);
 
-        return inquirer.prompt([
+        inquirer.prompt([
             {
                 name: 'title',
                 message: 'What is the title of this role?',
@@ -116,7 +116,6 @@ function addRole() {
         ]).then(answers => {
             const sql = `INSERT INTO role (title, salary, department_id)
             VALUES (?,?,?)`;
-            console.log(answers.choice);
             let departmentId = null;
             for (key in arr) {
                 if (rows[key].name === answers.choice) {
@@ -124,11 +123,10 @@ function addRole() {
                 }
             }
             const param = [answers.title, answers.salary, departmentId];
-            console.log(param);
             db.query(sql, param, (err, rows) => {
                 if (err) console.log(err);
                 console.log('role added successfully')
-                console.table(answers)
+                console.table(getRoles())
                 promptCommands();
             });
         });
@@ -144,7 +142,7 @@ function addEmployee() {
         const roles = [];
         rows.forEach(row => roles.push(row))
 
-        return inquirer.prompt([
+        inquirer.prompt([
             {
                 type: 'input',
                 name: 'first',
@@ -162,8 +160,6 @@ function addEmployee() {
                 choices: roles.map(role => ({ name: role.title, value: role.id })),
             }]).then(
                 (answers) => {
-                    console.log('ANSWERS')
-                    console.log(answers)
                     db.promise().query('SELECT * FROM employee').then(
                         ([rows]) => {
                             const managerChoices = rows.map(({ id, first_name, last_name }) => (
@@ -178,8 +174,6 @@ function addEmployee() {
                                 message: 'Who is the manager?',
                                 choices: managerChoices
                             }).then((manager) => {
-                                console.log('MANAGER')
-                                console.log(manager)
                                 const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id)
                                             VALUES (?,?,?,?)`;
 
@@ -204,7 +198,6 @@ function updateEmployee() {
             console.log(rows)
             const employees = [];
             rows.forEach(row => employees.push({ name: row.first_name + ' ' + row.last_name, value: row.id }))
-            console.log(employees);
             inquirer.prompt([
                 {
                     name: 'employee',
@@ -216,8 +209,7 @@ function updateEmployee() {
                 db.promise().query(`SELECT * FROM role`)
                     .then(([rows]) => {
                         const roles = [];
-                        rows.forEach(row => roles.push({ name: row.title, value: row.id }));
-                        console.log(roles);
+                        rows.forEach(row => roles.push({ name: row.title, value: row.id }))
                         inquirer.prompt([
                             {
                                 type: "list",
