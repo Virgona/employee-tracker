@@ -14,7 +14,7 @@ const db = mysql.createConnection(
     },
     console.log(`Connected to the employees_db database.`)
 );
-
+// function to start application
 function promptCommands() {
     inquirer.prompt(
         {
@@ -37,19 +37,19 @@ function promptCommands() {
 
         switch (response.command) {
             case 'View all Employees':
-                getEmployees()
+                getEmployees();
                 break;
 
             case 'View all Roles':
-                getRoles()
+                getRoles();
                 break;
 
             case 'View all Departments':
-                getDepartments()
+                getDepartments();
                 break;
 
             case 'Add Employee':
-                addEmployee()
+                addEmployee();
                 break;
 
             case 'Update Employee':
@@ -67,19 +67,8 @@ function promptCommands() {
                 break;
         };
 
-        // if they chose a diff command
-        // -- do that
-        // -- ask again
-
     })
-
-    // ask user for command
-    // then
-    // -- query the db for that command
-    // -- display it on the screen
-    // -- ask user for command
-    // -- then
-    // -- -- 
+    // function to add departments to database
 }
 function addDepartment() {
     inquirer.prompt([
@@ -95,11 +84,11 @@ function addDepartment() {
         const params = answers.dep;
         db.query(sql, params, (err, rows) => {
             console.log('department successfully added')
-            promptCommands()
+            promptCommands();
         })
     })
 }
-
+// function to add a role to database
 function addRole() {
     const sql = `SELECT * FROM department`;
 
@@ -143,6 +132,7 @@ function addRole() {
         });
     });
 };
+// function to add an employee to database
 function addEmployee() {
 
     const sql = `SELECT * FROM role`;
@@ -201,11 +191,8 @@ function addEmployee() {
         });
     });
 }
-
+// function to update an existing employee in the database
 function updateEmployee() {
-    // let arr;
-    // let employeeSelection;
-    // let roleSelection;
 
     db.promise().query(`SELECT * FROM employee`)
         .then(([rows]) => {
@@ -242,33 +229,9 @@ function updateEmployee() {
 
     console.log('employee successfully updated!');
     promptCommands();
-    // })
 }
-// db.query('SELECT * FROM role', (err, rows) => {
-//     if (err) { throw err };
-//     const arr = rows.map(role => role.id);
 
-//     let roles = [];
-//     rows.forEach(row => roles.push(row.title));
-//     let roleSelection = inquirer.prompt([
-//         {
-//             name: 'role',
-//             type: 'list',
-//             choices: roles,
-//             message: 'Select role to update employee with'
-//         }
-//     ]);
-// });
-
-// let roleId = null;
-// for (key in arr) {
-//     if (rows[key].title === answers.role) {
-//         roleId = parseInt(key) + 1
-//     }
-// }
-// sql = db.query("UPDATE employee SET ? WHERE ?", [{ role_id: roleSelection.role }, { id: employeeSelection.employee }]);
-
-
+// functions below get employees, roles and departments and displays them
 function getEmployees() {
     const sql = `SELECT * FROM employee`;
     db.query(sql, (err, data) => {
@@ -288,7 +251,7 @@ function getRoles() {
             return;
         }
         console.table(data)
-        promptCommands()
+        promptCommands();
     });
 }
 function getDepartments() {
@@ -299,8 +262,8 @@ function getDepartments() {
             return;
         }
         console.table(data)
-        promptCommands()
+        promptCommands();
     });
 }
-
+// starts CLI
 promptCommands()
