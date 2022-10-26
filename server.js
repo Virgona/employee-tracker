@@ -195,7 +195,6 @@ function updateEmployee() {
 
     db.promise().query(`SELECT * FROM employee`)
         .then(([rows]) => {
-            console.log(rows)
             const employees = [];
             rows.forEach(row => employees.push({ name: row.first_name + ' ' + row.last_name, value: row.id }))
             inquirer.prompt([
@@ -221,7 +220,7 @@ function updateEmployee() {
                             db.promise().query(`UPDATE employee SET role_id = ? WHERE id = ?`, [data.roleTitle, answers.employee]).then(
                                 () => {
                                     console.log('employee successfully updated!');
-                                    promptCommands();
+                                    return promptCommands();
                                 }
                             )
                         })

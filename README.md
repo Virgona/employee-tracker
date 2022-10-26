@@ -34,7 +34,7 @@ My highest success with this project was getting the update employee function ru
 ## The App
 
 You can find a link to the instructional video here:
-https://drive.google.com/file/d/1Xt3T0DPbyCcko-0ridk22ENPoXmQ78bD/view
+https://drive.google.com/file/d/1cVzQqV4kvhq2Cf1ocvaTzw6XJhQ0osBd/view
 
 If you wish to give it a go you can check it out at my repo here!
 https://github.com/Virgona/employee-tracker.git
